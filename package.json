@@ -1,0 +1,22 @@
+{
+  "name": "bi-focals",
+  "version": "0.1.0",
+  "main": "background.js",
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world",
+    "bundle": "webpack"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "bs-platform": "^4.0.18",
+    "copy-webpack-plugin": "^5.0.0",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3"
+  }
+}
