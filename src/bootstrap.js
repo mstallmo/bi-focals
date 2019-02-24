@@ -1,0 +1,1 @@
+import('./Main.bs.js').catch(e => console.error("Error importing Main.bs.js", e));
