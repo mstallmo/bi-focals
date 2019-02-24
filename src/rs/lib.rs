@@ -14,27 +14,11 @@ extern "C" {
     fn log(s: &str);
 }
 
-fn walk(indent: usize, handle: Handle) {
+fn walk(indent: usize, handle: &mut Handle) {
     let node = handle;
     // FIXME: don't allocate
     // print!("{}", repeat(" ").take(indent).collect::<String>());
     match node.data {
-        NodeData::Document => log(format!("#Document").as_str()),
-
-        NodeData::Doctype {
-            ref name,
-            ref public_id,
-            ref system_id,
-        } => log(format!("<!DOCTYPE {} \"{}\" \"{}\">", name, public_id, system_id).as_str()),
-
-        NodeData::Text { ref contents } => {
-            log(format!("#text: {}", escape_default(&contents.borrow())).as_str())
-        }
-
-        NodeData::Comment { ref contents } => {
-            log(format!("<!-- {} -->", escape_default(contents)).as_str())
-        }
-
         NodeData::Element {
             ref name,
             ref attrs,
@@ -50,23 +34,17 @@ fn walk(indent: usize, handle: Handle) {
                 log(">");
             }
         }
-
-        NodeData::ProcessingInstruction { .. } => unreachable!(),
+        _ => (),
     }
 
     for child in node.children.borrow().iter() {
-        walk(indent + 4, child.clone());
+        walk(indent + 4, &mut child.clone());
     }
-}
-
-// FIXME: Copy of str::escape_default from std, which is currently unstable
-fn escape_default(s: &str) -> String {
-    s.chars().flat_map(|c| c.escape_default()).collect()
 }
 
 #[wasm_bindgen]
 pub fn parse_html(input: &str) -> String {
-    let fragment = parse_fragment(
+    let mut fragment = parse_fragment(
         RcDom::default(),
         ParseOpts::default(),
         QualName::new(None, ns!(html), local_name!("body")),
@@ -76,7 +54,7 @@ pub fn parse_html(input: &str) -> String {
     .read_from(&mut input.as_bytes())
     .unwrap();
 
-    walk(0, fragment.document);
+    walk(0, &mut fragment.document);
 
     if !fragment.errors.is_empty() {
         log("\nParse errors:");
@@ -87,17 +65,17 @@ pub fn parse_html(input: &str) -> String {
         log("parsed html!");
     }
 
-    // let mut serialized_output = vec![];
-    // serialize(
-    //     &mut serialized_output,
-    //     &fragment.document.children.borrow()[0],
-    //     Default::default(),
-    // )
-    // .ok()
-    // .expect("serialization failed");
+    let mut serialized_output = vec![];
+    serialize(
+        &mut serialized_output,
+        &fragment.document.children.borrow()[0],
+        Default::default(),
+    )
+    .ok()
+    .expect("serialization failed");
 
-    // str::from_utf8(&serialized_output).unwrap().to_owned()
-    String::from("TEST")
+    str::from_utf8(&serialized_output).unwrap().to_owned()
+    // String::from("TEST")
 }
 
 #[cfg(test)]
