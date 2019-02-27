@@ -9,24 +9,32 @@ const copyPlugin = new CopyWebpackPlugin([
   { from: "manifest.json", to: "manifest.json" }
 ]);
 
-const wasmPackPlugin = new WasmPackPlugin({
-  crateDirectory: path.resolve(__dirname, ".")
-});
-
 module.exports = {
-  entry: "./src/bootstrap.js",
+  entry: {
+    background: "./src/background.js",
+    contentScript: "./src/contentScript.ts"
+  },
   mode: isProd ? "production" : "development",
   watch: !isProd,
   devtool: "cheap-module-source-map",
   output: {
     path: outputDir,
-    filename: "background.js"
+    filename: "[name].js"
   },
   resolve: {
-    extensions: [".js", ".wasm"]
+    extensions: [".js", ".wasm", ".ts"]
   },
   node: {
     fs: "empty"
   },
-  plugins: [copyPlugin, wasmPackPlugin]
+  plugins: [copyPlugin],
+  module: {
+    rules: [
+      {
+        test: /\.ts?$/,
+        use: "ts-loader",
+        exclude: /node_modules/
+      }
+    ]
+  }
 };

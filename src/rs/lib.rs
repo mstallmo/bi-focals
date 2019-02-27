@@ -1,5 +1,5 @@
-use scraper::{Html, Selector};
 use wasm_bindgen::prelude::*;
+use web_sys::Document;
 
 #[wasm_bindgen]
 extern "C" {
@@ -7,27 +7,25 @@ extern "C" {
     fn log(s: &str);
 }
 
-#[wasm_bindgen]
-pub fn parse_html(input: &str) -> String {
-    let fragment = Html::parse_fragment(input);
+#[wasm_bindgen(start)]
+pub fn main() {
+    let doc = Document::new().unwrap();
+    let img_elements = doc.get_elements_by_tag_name("img");
 
-    let img_selector = Selector::parse("img").unwrap();
-    // for element in fragment.select(&img_selector) {
-    //     log(element.value().name());
-    //     log(element.value().attr("src").unwrap());
-    // }
-    let element = fragment.select(&img_selector).next().unwrap();
+    let element = img_elements.item(0).unwrap();
 
-    String::from(element.value().attr("src").unwrap())
+    log(&element.get_attribute("src").unwrap());
+
+    // Document::get_elements_by_tag_name("img");
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[test]
-    fn it_should_parse_a_fragment() {
-        let data = "<a href=\"foo\"></a>";
-        parse_html(data);
-    }
-}
+//     #[test]
+//     fn it_should_parse_a_fragment() {
+//         let data = "<a href=\"foo\"></a>";
+//         parse_html(data);
+//     }
+// }

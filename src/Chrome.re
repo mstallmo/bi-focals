@@ -6,7 +6,10 @@ module Tabs = {
   };
 
   [@bs.deriving abstract]
-  type details = {code: string};
+  type details = {
+    code: option(string),
+    file: string,
+  };
 
   [@bs.scope ("chrome", "tabs", "onActivated")] [@bs.val]
   external addListener: (activeInfo => unit) => unit = "";
